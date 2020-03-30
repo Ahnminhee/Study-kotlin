@@ -5,11 +5,18 @@ import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.browse
+import org.jetbrains.anko.email
+import org.jetbrains.anko.sendSMS
+import org.jetbrains.anko.share
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         webView.apply {
             settings.javaScriptEnabled = true
-            webViewClient = webViewClient
+            webViewClient = WebViewClient()
         }
 
         webView.loadUrl("http://www.google.com")
@@ -34,7 +41,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        onBackPressed()
+        registerForContextMenu(webView)
+
     }
 
     override fun onBackPressed() {
@@ -72,11 +80,36 @@ class MainActivity : AppCompatActivity() {
                 }
                 return true
             }
-            R.id.action_send_text, R.id.action_email -> {
+            R.id.action_send_text -> {
+                sendSMS("063-2000-0606", webView.url)
+                return true
+            }
+            R.id.action_email -> {
+                email("Fullsun@mark.com", "햇쨔니 와떠염", webView.url)
                 return true
             }
         }
-
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu?,
+        v: View?,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        menuInflater.inflate(R.menu.context, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        when(item?.itemId) {
+            R.id.action_share -> {
+                share(webView.url)
+            }
+            R.id.action_browser -> {
+                browse(webView.url)
+            }
+        }
+        return super.onContextItemSelected(item)
     }
 }
